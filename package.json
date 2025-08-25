@@ -4,14 +4,17 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc",
     "dev": "nodemon src/server.ts"
+    
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^17.2.1",
     "express": "^5.1.0"
   },
   "devDependencies": {
