@@ -3,6 +3,9 @@ import  {serverConfig} from "./config/index";
 import pingRouter from "./routers/ping.router";
 const app = express();
 
+/**
+ * registering routes and there corresponding route without app server object
+ */
 app.use(pingRouter);
 
 app.listen(serverConfig.PORT, () => {
