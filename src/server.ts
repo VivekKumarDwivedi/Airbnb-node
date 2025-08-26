@@ -1,8 +1,9 @@
 import express from 'express';
 import  {serverConfig} from "./config/index";
 import v1Router from "./routers/v1/index.router";
-import v2Router from './routers/v2/index.router';
+import v2Router from "./routers/v2/index.router";
 const app = express();
+
 
 /**
  * registering routes and there corresponding route without app server object
