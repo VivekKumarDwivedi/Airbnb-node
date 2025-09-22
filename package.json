@@ -2,12 +2,10 @@
   "name": "expresstypescripttemplate",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",
     "build": "tsc",
-    "dev": "tsx src/server.ts"
-    
+    "dev": "nodemon --exec tsx ./src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +13,12 @@
   "description": "",
   "dependencies": {
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.4.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.4",

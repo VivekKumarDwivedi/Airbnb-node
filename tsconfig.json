@@ -10,7 +10,8 @@
     "module": "nodeNext",
     "moduleResolution": "nodenext",
     "target": "esnext",
-    "types": [],
+    "types": ["node"],
+    
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -34,11 +35,12 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    //  "esModuleInterop": true, // Add this for better compatibility
-    // "allowSyntheticDefaultImports": true, // Add this
+      // "esModuleInterop": true, // Add this for better compatibility
+    //  "allowSyntheticDefaultImports": true, // Add this
+
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",

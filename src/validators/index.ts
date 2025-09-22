@@ -1,0 +1,47 @@
+import { AnyZodObject } from "zod/v3";
+import { Request, Response, NextFunction } from "express";
+
+
+/**
+ * Middleware to validate request body against a zod schema
+ * @param schema - zod schema to validate request body
+ * @returns Express middleware function
+ */
+
+export const validateRequestBody = (schema: AnyZodObject) =>{
+
+    return async(req:Request, res:Response, next:NextFunction) => {
+        try{
+              await schema.parseAsync(req.body);
+              console.log("Validation successful");
+               next();
+        }catch(error){
+            // if the validation fails
+           res.status(400).json({
+                message: "Invalid request body",
+                success: false,
+                error: error
+           });
+
+        }
+    }
+}
+
+export const validateRequestQuery = (schema: AnyZodObject) =>{
+    return async(req:Request, res:Response, next:NextFunction) => {
+        try{
+              await schema.parseAsync(req.query);
+              console.log("Validation successful");
+               next();
+        }catch(error){
+            // if the validation fails
+            res.status(400).json({
+                message: "Invalid request query",
+                success: false,
+                error: error
+           });
+        }
+    }   
+}
+
+
