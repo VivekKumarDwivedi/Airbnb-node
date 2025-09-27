@@ -1,5 +1,6 @@
 import { AnyZodObject } from "zod/v3";
 import { Request, Response, NextFunction } from "express";
+import logger from "../config/logger.config";
 
 
 /**
@@ -13,7 +14,7 @@ export const validateRequestBody = (schema: AnyZodObject) =>{
     return async(req:Request, res:Response, next:NextFunction) => {
         try{
               await schema.parseAsync(req.body);
-              console.log("Validation successful");
+              logger.info("Validation successful");
                next();
         }catch(error){
             // if the validation fails
@@ -31,7 +32,7 @@ export const validateRequestQuery = (schema: AnyZodObject) =>{
     return async(req:Request, res:Response, next:NextFunction) => {
         try{
               await schema.parseAsync(req.query);
-              console.log("Validation successful");
+              logger.info("Validation successful");
                next();
         }catch(error){
             // if the validation fails
