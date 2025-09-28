@@ -25,9 +25,7 @@ const logger =winston.createLogger({
             datePattern:"YYYY-MM-DD",
             maxSize:"20m",
             maxFiles:"14d"
-
-
-        })
+        })//todo :add logic to integrate and save logs in mongo
     ]
 });
 export default logger;
