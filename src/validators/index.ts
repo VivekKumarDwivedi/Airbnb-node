@@ -1,4 +1,4 @@
-import { AnyZodObject } from "zod/v3";
+import { AnyZodObject } from "zod";
 import { Request, Response, NextFunction } from "express";
 import logger from "../config/logger.config";
 
