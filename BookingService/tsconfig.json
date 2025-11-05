@@ -35,8 +35,8 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-      // "esModuleInterop": true, // Add this for better compatibility
-    //  "allowSyntheticDefaultImports": true, // Add this
+       "esModuleInterop": true, // Add this for better compatibility
+       "allowSyntheticDefaultImports": true, // Add this
 
     "strict": true,
     "jsx": "react-jsx",
