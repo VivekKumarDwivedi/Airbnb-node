@@ -25,9 +25,48 @@ func NewUserRepository(_db *sql.DB) UserRepository {
 }
 
 func (u *UserRepositoryImpl) GetAll() ([]*models.User, error) {
-	return nil, nil
+
+	query := "SELECT id, username, email FROM users"
+
+	rows, err := u.db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*models.User
+
+	for rows.Next() {
+		user := &models.User{}
+
+		err := rows.Scan(&user.Id, &user.Username, &user.Email)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+
+	}
+	return users, nil
 }
 func (u *UserRepositoryImpl) DeleteByID(id int64) error {
+
+	if id <= 0 {
+		return fmt.Errorf("invalid Id : must be greater than zero")
+	}
+	query := "DELETE FROM users WHERE id = ?"
+
+	_, err := u.db.Exec(query, id)
+
+	if err != nil {
+		fmt.Println("Error deleting user: ", err)
+		return err
+	}
+
+	fmt.Println("User should be deleted")
+
 	return nil
 }
 func (u *UserRepositoryImpl) GetByEmail(email string) (*models.User, error) {

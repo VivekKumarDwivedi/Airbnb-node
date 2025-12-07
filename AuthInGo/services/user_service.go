@@ -3,6 +3,8 @@ package services
 import (
 	env "AuthInGo/config/env"
 	db "AuthInGo/db/repositories"
+	"AuthInGo/dto"
+	"AuthInGo/models"
 	"AuthInGo/utils"
 	"fmt"
 
@@ -12,7 +14,9 @@ import (
 type UserService interface {
 	GetUserById() error
 	CreateUser() error
-	LoginUser() (string, error)
+	LoginUser(payload *dto.LoginUserrequestDTO) (string, error)
+	DeleteUserById() error
+	GetAllUser() ([]*models.User, error)
 }
 
 type UserServiceImpl struct {
@@ -32,6 +36,30 @@ func (u *UserServiceImpl) GetUserById() error {
 	return nil
 }
 
+func (u *UserServiceImpl) GetAllUser() ([]*models.User, error) {
+	fmt.Println("Fetching all user in UserService")
+	row, err := u.userRepository.GetAll()
+
+	if err != nil {
+		fmt.Println("No User found")
+	}
+	return row, nil
+
+}
+
+func (u *UserServiceImpl) DeleteUserById() error {
+	fmt.Println("Fetching user in UserService")
+	id := 2
+	err := u.userRepository.DeleteByID(int64(id))
+
+	if err != nil {
+		fmt.Println("User Should not found")
+		return err
+	}
+
+	return nil
+}
+
 func (u *UserServiceImpl) CreateUser() error {
 	fmt.Println("Creating user in UserService")
 	password := "example_password"
@@ -47,10 +75,10 @@ func (u *UserServiceImpl) CreateUser() error {
 	return nil
 }
 
-func (u *UserServiceImpl) LoginUser() (string, error) {
+func (u *UserServiceImpl) LoginUser(payload *dto.LoginUserrequestDTO) (string, error) {
 	//Pre-requsite This function will be given email and password as parameter,which we can hardcode for now.
-	email := "user2@example.com"
-	password := "example_password"
+	email := payload.Email
+	password := payload.Password
 	//step 1: Make a repo call to get the user by email
 	user, err := u.userRepository.GetByEmail(email)
 
@@ -72,12 +100,12 @@ func (u *UserServiceImpl) LoginUser() (string, error) {
 		return "", nil
 	}
 	//step 4: if password matches, print a JWT tokens , else return error saying password does not match
-	payload := jwt.MapClaims{
+	jwtPayload := jwt.MapClaims{
 		"email": user.Email,
 		"id":    user.Id,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
 
 	tokenString, err := token.SignedString([]byte(env.GetString("JWT_SECRET", "TOKEN")))
 

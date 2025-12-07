@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"AuthInGo/dto"
 	"AuthInGo/services"
+	"AuthInGo/utils"
 	"fmt"
 	"net/http"
 )
@@ -30,6 +32,38 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("LoginUser called in UserController")
-	uc.UserService.LoginUser()
-	w.Write([]byte("User LoginUser endpoint done"))
+
+	var payload dto.LoginUserrequestDTO
+
+	if jsonErr := utils.ReadJsonBody(r, &payload); jsonErr != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Something went wrong while logging in", jsonErr)
+		return
+	}
+
+	if validationErr := utils.Validator.Struct(payload); validationErr != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Input invalid data", validationErr)
+		fmt.Println("validationErr :", validationErr)
+		return
+	}
+
+	jwtToken, err := uc.UserService.LoginUser(&payload)
+
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to login user", err)
+		return
+	}
+
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "User Logged in successfully", jwtToken)
+}
+
+func (uc *UserController) DeleteUserById(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DeleteUserById called in UserController")
+	uc.UserService.DeleteUserById()
+	w.Write([]byte("User delete endpoint done"))
+}
+
+func (uc *UserController) GetAllUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GetAllUser called in UserController")
+	uc.UserService.GetAllUser()
+	w.Write([]byte("All user getting endpoint done"))
 }
