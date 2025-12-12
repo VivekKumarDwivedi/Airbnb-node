@@ -6,7 +6,6 @@ import (
 	"AuthInGo/utils"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type UserController struct {
@@ -22,30 +21,23 @@ func NewUserController(_userService services.UserService) *UserController {
 func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetUserById called in UserController")
 	// Read id from query ?id=123
-	userIdStr := r.URL.Query().Get("id")
+	userId := r.URL.Query().Get("id")
 
 	// If not in query, try context
-	if userIdStr == "" {
-		ctxVal := r.Context().Value("userID")
-		if ctxVal != nil {
-			userIdStr = fmt.Sprintf("%v", ctxVal) // convert to string safely
-		}
+	if userId == "" {
+		userId = r.Context().Value("userID").(string)
+
 	}
 
-	fmt.Println("User ID from context or query:", userIdStr)
+	fmt.Println("User ID from context or query:", userId)
 
 	// If still empty → error
-	if userIdStr == "" {
+	if userId == "" {
 		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "User ID is required", fmt.Errorf("missing user ID"))
 		return
 	}
 
 	// Convert string → int
-	userId, err := strconv.ParseInt(userIdStr, 10, 64)
-	if err != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "User ID must be an integer", err)
-		return
-	}
 
 	user, err := uc.UserService.GetUserById(userId)
 	if err != nil {
@@ -53,7 +45,7 @@ func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
-		utils.WriteJsonErrorResponse(w, http.StatusNotFound, "User not found", fmt.Errorf("user with ID %d not found", userId))
+		utils.WriteJsonErrorResponse(w, http.StatusNotFound, "User not found", fmt.Errorf("user with ID %s not found", userId))
 		return
 	}
 	utils.WriteJsonSuccessResponse(w, http.StatusOK, "User fetched successfully", user)

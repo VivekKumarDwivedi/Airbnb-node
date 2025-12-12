@@ -22,7 +22,7 @@ func UserLoginRequestValidator(next http.Handler) http.Handler {
 			return
 		}
 		fmt.Println("Payload recived for login:", payload)
-		ctx := context.WithValue(r.Context(), "payload", payload)
+		ctx := context.WithValue(r.Context(), PayloadKey, payload)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -41,7 +41,7 @@ func CreateUserRequestValidator(next http.Handler) http.Handler {
 			utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Validation failed", err)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "payload", payload)
+		ctx := context.WithValue(r.Context(), PayloadKey, payload)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

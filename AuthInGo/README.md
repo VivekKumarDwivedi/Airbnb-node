@@ -5,3 +5,5 @@
 2. write a middleware to validate every incoming request body
 
 3. Setup a good error Handling machanism
+
+4. Explore ip addr and jwt based rate limiting
