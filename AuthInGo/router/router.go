@@ -3,6 +3,7 @@ package router
 import (
 	"AuthInGo/controllers"
 	"AuthInGo/middlewares"
+
 	// "AuthInGo/middlewares"
 
 	"github.com/go-chi/chi/v5"
@@ -22,6 +23,8 @@ func SetupRouter(UserRouter Router) *chi.Mux {
 
 	chiRouter.Use(middlewares.RateLimitMiiddleware)
 	chiRouter.Get("/ping", controllers.PingHandler)
+
+	// chiRouter.HandleFunc("/bookingservice/*", utils.ProxyToService("https://booking-service:8080", "/bookingservice"))
 
 	UserRouter.Register(chiRouter)
 
