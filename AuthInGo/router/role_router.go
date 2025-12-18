@@ -20,5 +20,9 @@ func (rr *RoleRouter) Register(r chi.Router) {
 	r.Get("/roles/{id}", rr.RoleController.GetRoleById)
 	r.Get("/roles", rr.RoleController.GetAllRoles)
 	r.Post("/roles", rr.RoleController.CreateRole)
+	r.Put("/roles/{id}", rr.RoleController.UpdateRole)
+	r.Delete("/roles/{id}", rr.RoleController.DeleteRoleById)
+	r.Get("/roles/{id}/permissions", rr.RoleController.GetRolePermissions)
+	r.Post("/roles/{id}/permissions", rr.RoleController.AddPermissionToRole)
 
 }

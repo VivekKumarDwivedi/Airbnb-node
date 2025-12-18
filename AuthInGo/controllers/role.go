@@ -67,3 +67,96 @@ func (rc *RoleController) CreateRole(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.WriteJsonSuccessResponse(w, http.StatusCreated, "Role created successfully", role)
 }
+
+func (rc *RoleController) DeleteRoleById(w http.ResponseWriter, r *http.Request) {
+	roleId := chi.URLParam(r, "id")
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+
+	id, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	err = rc.RoleService.DeleteRoleById(id)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to delete role", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Role deleted successfully", nil)
+}
+
+func (rc *RoleController) UpdateRole(w http.ResponseWriter, r *http.Request) {
+	roleId := chi.URLParam(r, "id")
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+	id, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	name := r.FormValue("name")
+	description := r.FormValue("description")
+	if name == "" || description == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Name and Description are required", fmt.Errorf("missing name or description"))
+		return
+	}
+	role, err := rc.RoleService.UpdateRole(id, name, description)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to update role", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Role updated successfully", role)
+}
+
+func (rc *RoleController) GetRolePermissions(w http.ResponseWriter, r *http.Request) {
+	roleId := chi.URLParam(r, "id")
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+	id, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	permissions, err := rc.RoleService.GetRolePermission(id)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to get role permissions", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Role permissions fetched successfully", permissions)
+}
+
+func (rc *RoleController) AddPermissionToRole(w http.ResponseWriter, r *http.Request) {
+	roleId := chi.URLParam(r, "id")
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+	id, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	permissionIdStr := r.FormValue("permission_id")
+	if permissionIdStr == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Permission ID is required", fmt.Errorf("missing permission ID"))
+		return
+	}
+	permissionId, err := strconv.ParseInt(permissionIdStr, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Permission ID", fmt.Errorf("permission ID must be a valid integer"))
+		return
+	}
+	rolePermission, err := rc.RoleService.AddPermissionToRole(id, permissionId)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to add permission to role", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Permission added to role successfully", rolePermission)
+}

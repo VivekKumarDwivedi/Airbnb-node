@@ -12,6 +12,7 @@ type UserRoleRepository interface {
 	GetUserPermissions(userId int64) ([]*models.Permission, error)
 	HasPermission(userId int64, resource string, action string) (bool, error)
 	HasRole(userId int64, roleName string) (bool, error)
+	HasAllRoles(userId int64, roleNames []string) (bool, error)
 }
 
 type UserRoleRepositoryImpl struct {
@@ -121,4 +122,30 @@ func (ur *UserRoleRepositoryImpl) HasRole(userId int64, roleName string) (bool, 
 		return false, err
 	}
 	return exists, nil
+}
+
+func (u *UserRoleRepositoryImpl) HasAllRoles(userId int64, roleNames []string) (bool, error) {
+
+	if len(roleNames) == 0 {
+		return true, nil
+	}
+
+	query := `
+		SELECT COUNT(*) = ?
+		FROM user_roles ur
+		INNER JOIN roles r ON ur.role_id = r.id
+		WHERE ur.user_id = ? AND r.name IN (?)
+		GROUP BY ur.user_id`
+
+	row := u.db.QueryRow(query, len(roleNames), userId, roleNames)
+
+	var hasAllRoles bool
+	if err := row.Scan(&hasAllRoles); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return hasAllRoles, nil
 }
