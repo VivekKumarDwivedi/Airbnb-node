@@ -4,8 +4,6 @@ import (
 	"AuthInGo/controllers"
 	"AuthInGo/middlewares"
 
-	// "AuthInGo/middlewares"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -14,7 +12,7 @@ type Router interface {
 	Register(r chi.Router)
 }
 
-func SetupRouter(UserRouter Router) *chi.Mux {
+func SetupRouter(UserRouter Router, RoleRouter Router) *chi.Mux {
 
 	chiRouter := chi.NewRouter()
 
@@ -27,6 +25,7 @@ func SetupRouter(UserRouter Router) *chi.Mux {
 	// chiRouter.HandleFunc("/bookingservice/*", utils.ProxyToService("https://booking-service:8080", "/bookingservice"))
 
 	UserRouter.Register(chiRouter)
+	RoleRouter.Register(chiRouter)
 
 	return chiRouter
 }
