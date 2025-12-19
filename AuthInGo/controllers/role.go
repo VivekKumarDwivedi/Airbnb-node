@@ -20,6 +20,35 @@ func NewRoleController(roleService services.RoleService) *RoleController {
 	}
 }
 
+func (rc *RoleController) AssignRoleToUser(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+	roleId := chi.URLParam(r, "roleId")
+	if userId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "User ID is required", fmt.Errorf("missing user ID"))
+		return
+	}
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+	userIdInt, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid User ID", fmt.Errorf("user ID must be a valid integer"))
+		return
+	}
+	roleIdInt, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	err = rc.RoleService.AssignRoleToUser(userIdInt, roleIdInt)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to assign role to user", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Role assigned to user successfully", nil)
+}
+
 func (rc *RoleController) GetRoleById(w http.ResponseWriter, r *http.Request) {
 	roleId := chi.URLParam(r, "id")
 
@@ -159,4 +188,34 @@ func (rc *RoleController) AddPermissionToRole(w http.ResponseWriter, r *http.Req
 		return
 	}
 	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Permission added to role successfully", rolePermission)
+}
+
+func (rc *RoleController) RemovePermissionFromRole(w http.ResponseWriter, r *http.Request) {
+	roleId := chi.URLParam(r, "id")
+	if roleId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Role ID is required", fmt.Errorf("missing role ID"))
+		return
+	}
+
+	id, err := strconv.ParseInt(roleId, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Role ID", fmt.Errorf("role ID must be a valid integer"))
+		return
+	}
+	permissionIdStr := r.FormValue("permission_id")
+	if permissionIdStr == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Permission ID is required", fmt.Errorf("missing permission ID"))
+		return
+	}
+	permissionId, err := strconv.ParseInt(permissionIdStr, 10, 64)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid Permission ID", fmt.Errorf("permission ID must be a valid integer"))
+		return
+	}
+	err = rc.RoleService.RemovePermissionFromRole(id, permissionId)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to remove permission from role", err)
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Permission removed from role successfully", nil)
 }

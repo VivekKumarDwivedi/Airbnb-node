@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"AuthInGo/dto"
+	"AuthInGo/middlewares"
 	"AuthInGo/services"
 	"AuthInGo/utils"
 	"fmt"
@@ -25,7 +26,7 @@ func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 	// If not in query, try context
 	if userId == "" {
-		userId = r.Context().Value("userID").(string)
+		userId = r.Context().Value(middlewares.UserIDKey).(string)
 
 	}
 
@@ -53,8 +54,12 @@ func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	payload := r.Context().Value("payload").(dto.CreateUserRequestDTO)
-
+	fmt.Printf("CreateUser called in UserController\n")
+	payload, ok := r.Context().Value(middlewares.PayloadKey).(dto.CreateUserRequestDTO)
+	if !ok {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
 	fmt.Println("Payload received:", payload)
 
 	user, err := uc.UserService.CreateUser(&payload)
@@ -71,7 +76,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("LoginUser called in UserController")
 
-	payload := r.Context().Value("payload").(dto.LoginUserrequestDTO)
+	payload := r.Context().Value(middlewares.PayloadKey).(dto.LoginUserrequestDTO)
 
 	fmt.Println("Pyload recived:", payload)
 

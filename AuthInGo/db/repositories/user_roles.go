@@ -3,6 +3,8 @@ package db
 import (
 	"AuthInGo/models"
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 type UserRoleRepository interface {
@@ -13,6 +15,7 @@ type UserRoleRepository interface {
 	HasPermission(userId int64, resource string, action string) (bool, error)
 	HasRole(userId int64, roleName string) (bool, error)
 	HasAllRoles(userId int64, roleNames []string) (bool, error)
+	HasAnyRole(userId int64, roleNames []string) (bool, error)
 }
 
 type UserRoleRepositoryImpl struct {
@@ -137,7 +140,8 @@ func (u *UserRoleRepositoryImpl) HasAllRoles(userId int64, roleNames []string) (
 		WHERE ur.user_id = ? AND r.name IN (?)
 		GROUP BY ur.user_id`
 
-	row := u.db.QueryRow(query, len(roleNames), userId, roleNames)
+	roleNamesStr := strings.Join(roleNames, "','")
+	row := u.db.QueryRow(query, len(roleNames), userId, roleNamesStr)
 
 	var hasAllRoles bool
 	if err := row.Scan(&hasAllRoles); err != nil {
@@ -148,4 +152,44 @@ func (u *UserRoleRepositoryImpl) HasAllRoles(userId int64, roleNames []string) (
 	}
 
 	return hasAllRoles, nil
+}
+
+func (u *UserRoleRepositoryImpl) HasAnyRole(userId int64, roleNames []string) (bool, error) {
+
+	// ❗ SECURITY FIX
+	if len(roleNames) == 0 {
+		return false, nil
+	}
+
+	placeholders := make([]string, len(roleNames))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+
+	query := fmt.Sprintf(`
+		SELECT COUNT(*) > 0
+		FROM user_roles ur
+		INNER JOIN roles r ON ur.role_id = r.id
+		WHERE ur.user_id = ?
+		  AND r.name IN (%s)
+	`, strings.Join(placeholders, ","))
+
+	args := make([]interface{}, 0, 1+len(roleNames))
+	args = append(args, userId)
+
+	for _, roleName := range roleNames {
+		args = append(args, roleName)
+	}
+
+	row := u.db.QueryRow(query, args...)
+
+	var hasAnyRole bool
+	if err := row.Scan(&hasAnyRole); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return hasAnyRole, nil
 }
